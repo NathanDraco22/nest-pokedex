@@ -1,53 +1,74 @@
 import { Injectable } from '@nestjs/common';
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common/exceptions';
+import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
 
 @Injectable()
 export class PokemonService {
-
-
   constructor(
     @InjectModel(Pokemon.name)
     private readonly pokemonModel : Model<Pokemon>
   ){}
 
+
   async create(createPokemonDto: CreatePokemonDto) {
 
     createPokemonDto.name = createPokemonDto.name.toLocaleLowerCase();
-
     try {
-      
       const result = await this.pokemonModel.create(createPokemonDto);
       return result;
-
     } catch (error) {
-
       if (error.code === 11000){
         throw new BadRequestException("Registro de Pokemon Duplicado");
       }
       console.log(error);
       throw new InternalServerErrorException("Verify server logs");
-      
     }
+  
   }
 
   findAll() {
-    return `This action returns all pokemon`;
+    let algo = this.pokemonModel.find()
+    return algo;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pokemon`;
+  async findOne(param: string) : Promise<Pokemon> {
+    
+    let pokemon : Pokemon;
+    console.log(param);
+    if (!isNaN(+param)){
+      pokemon = await this.pokemonModel.findOne({no : param});
+    }
+    if (isValidObjectId(param)){
+      pokemon = await this.pokemonModel.findById(param);
+    }
+    if(!pokemon){
+      pokemon = await this.pokemonModel.findOne({name : param});
+    }
+    if(!pokemon ){
+      throw new NotFoundException("Pokemon not found");
+    }
+    return pokemon;
+  
   }
 
-  update(id: number, updatePokemonDto: UpdatePokemonDto) {
-    return `This action updates a #${id} pokemon`;
+  async update(id: string, updatePokemonDto: UpdatePokemonDto) {
+    let pokemonResult = await this.findOne(id);
+    await pokemonResult.updateOne(updatePokemonDto);
+    return {
+      ...pokemonResult , ...updatePokemonDto
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
-  }
+  async remove(id: string) {
+
+      let {deletedCount } =  await this.pokemonModel.deleteOne({_id : id});
+      if(!deletedCount) throw new BadRequestException("Item doesn't exists yeaaaah");
+      return true;
+  
+    }
+
 }

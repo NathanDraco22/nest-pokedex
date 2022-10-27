@@ -3,6 +3,7 @@ import { PokemonService } from './pokemon.service';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { HttpCode } from '@nestjs/common/decorators';
+import { ParsemongoidPipe } from 'src/common/pipes/parsemongoid.pipe';
 
 @Controller('pokemon')
 export class PokemonController {
@@ -19,18 +20,18 @@ export class PokemonController {
     return this.pokemonService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pokemonService.findOne(+id);
+  @Get(':param')
+  findOne(@Param('param') param: string) {
+    return this.pokemonService.findOne(param);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePokemonDto: UpdatePokemonDto) {
-    return this.pokemonService.update(+id, updatePokemonDto);
+  @Patch(':param')
+  update(@Param('param') param: string, @Body() updatePokemonDto: UpdatePokemonDto) {
+    return this.pokemonService.update(param, updatePokemonDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pokemonService.remove(+id);
+  remove(@Param('id', ParsemongoidPipe ) id: string) {
+    return this.pokemonService.remove(id);
   }
 }
