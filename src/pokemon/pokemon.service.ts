@@ -38,7 +38,6 @@ export class PokemonService {
   async findOne(param: string) : Promise<Pokemon> {
     
     let pokemon : Pokemon;
-    console.log(param);
     if (!isNaN(+param)){
       pokemon = await this.pokemonModel.findOne({no : param});
     }
