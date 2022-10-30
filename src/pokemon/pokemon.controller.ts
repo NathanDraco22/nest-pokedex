@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PokemonService } from './pokemon.service';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { HttpCode } from '@nestjs/common/decorators';
 import { ParsemongoidPipe } from 'src/common/pipes/parsemongoid.pipe';
+import { QueryParamDto } from 'src/common/dtos/query.dto';
 
 @Controller('pokemon')
 export class PokemonController {
@@ -16,8 +17,8 @@ export class PokemonController {
   }
 
   @Get()
-  findAll() {
-    return this.pokemonService.findAll();
+  findAll(@Query() queryParam : QueryParamDto ) {
+    return this.pokemonService.findAll(queryParam);
   }
 
   @Get(':param')

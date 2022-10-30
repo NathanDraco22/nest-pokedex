@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
+import { QueryParamDto } from 'src/common/dtos/query.dto';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
@@ -30,8 +31,9 @@ export class PokemonService {
   
   }
 
-  findAll() {
-    let algo = this.pokemonModel.find()
+  findAll(queryParam : QueryParamDto ) {
+    const {limit = 10 , offset = 0 } = queryParam;
+    let algo = this.pokemonModel.find().skip(offset).limit(limit).select("-__v");
     return algo;
   }
 
